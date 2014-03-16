@@ -63,7 +63,7 @@ public class BPlusTreeIntegerTest {
 		// tree.insert(11,11) ;
 		// tree.insert(13,13) ;
 		
-		for (int i = 1 ; i <=20 ; i++) {
+		for (int i = 1 ; i <=100 ; i++) {
 			
 			tree.insert(i, i) ;
 		}

@@ -20,9 +20,9 @@ import com.mj.db.serialization.SerDeserializer;
 
 public class BPlusTree<T> {
 
-	// private final int BLOCK_SIZE = 1024 ; // bytes
+	private final int BLOCK_SIZE = 1024 ; // bytes
 	// private final int BLOCK_SIZE = 128 ;
-	private final int BLOCK_SIZE = 256 ;
+	// private final int BLOCK_SIZE = 256 ;
 	
 	private int keysize ;
 	
@@ -36,6 +36,8 @@ public class BPlusTree<T> {
 	
 	private SerDeserializer<T> keySerDeser ;
 	private Comparator<T> keyComparator ;
+	
+	private int M = 0 ;
 	
 	
 	private BPlusTree() {
@@ -58,6 +60,10 @@ public class BPlusTree<T> {
 		keySerDeser = sd ;
 		keyComparator = kc ;
 		
+		keysize = keysize ;
+		
+		M = BLOCK_SIZE/keysize ;
+		
 		treeStore = new RandomAccessFile(fname,"rw") ;
 		
 		
@@ -70,6 +76,10 @@ public class BPlusTree<T> {
 		return ;
 	}
 	
+	protected int getNumKeysPerBlock() {
+		
+		return M ;
+	}
 	
 	public SerDeserializer<T> getSerDeserializer() {
 		

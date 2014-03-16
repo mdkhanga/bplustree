@@ -9,5 +9,7 @@ public interface SerDeserializer<T> {
 	public T read(DataInputStream dis) throws IOException ;
 	
 	public void write(T value, DataOutputStream dos) throws IOException ;
+	
+	
 
 }

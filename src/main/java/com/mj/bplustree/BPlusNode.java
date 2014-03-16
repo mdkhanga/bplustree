@@ -15,7 +15,7 @@ public class BPlusNode<T>  {
 	
 	// private int M = 4 ; // maximum number of entries per node
 	// 6/29/03 experiment with larger M
-	private int M = 8 ;
+	private int M = 0 ;
 	
 	private int blockpointer ; // address within disk for this block
 	
@@ -73,6 +73,8 @@ public class BPlusNode<T>  {
 		keySerDeser = tree.getSerDeserializer() ;
 		keyComparator = tree.getKeyComparator() ;
 		
+		M = container.getNumKeysPerBlock() ;
+		
 	}
 	
 	public BPlusNode(BPlusTree tree, byte[] b, int blockpointer) throws IOException {
@@ -82,6 +84,8 @@ public class BPlusNode<T>  {
 		keySerDeser = tree.getSerDeserializer() ;
 		keyComparator = tree.getKeyComparator() ;
 		
+		
+		M = container.getNumKeysPerBlock() ;
 		
 		if (blockpointer == 0)
 			isRoot = true ;
