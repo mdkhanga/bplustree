@@ -11,6 +11,8 @@ import java.util.Comparator;
 
 import com.mj.db.serialization.SerDeserializer;
 
+
+
 /**
  * B+ tree
  * First implementation with integer key
@@ -18,11 +20,13 @@ import com.mj.db.serialization.SerDeserializer;
  *
  */
 
+@SuppressWarnings("unused")
 public class BPlusTree<T> {
 
 	private final int BLOCK_SIZE = 1024 ; // bytes
 	// private final int BLOCK_SIZE = 128 ;
 	// private final int BLOCK_SIZE = 256 ;
+	private final int VALUE_SIZE = 8 ; //long
 	
 	private int keysize ;
 	
@@ -62,7 +66,7 @@ public class BPlusTree<T> {
 		
 		keysize = keysize ;
 		
-		M = BLOCK_SIZE/keysize ;
+		M = (BLOCK_SIZE - 14)/( keysize + VALUE_SIZE) ;
 		
 		treeStore = new RandomAccessFile(fname,"rw") ;
 		
@@ -91,10 +95,10 @@ public class BPlusTree<T> {
 		return keyComparator ;
 	}
 	
-	public byte[] find(int key) {
+	public T find(T key) {
 		
 		
-		return null ;
+		return root.find(key) ;
 	}
 	
 	public byte[] getNext() {
@@ -105,7 +109,7 @@ public class BPlusTree<T> {
 	}
 	
 	
-	public void insert(T key, Object value) {
+	public void insert(T key, long value) {
 		
 		BPlusNode<T> node = null ;
 		
@@ -138,9 +142,9 @@ public class BPlusTree<T> {
 		
 	}
 	
-	public void delete(int key) {
+	public void delete(T key) {
 		
-		
+		root.delete(key) ;
 	}
 	
 	public BPlusNode<T> readFromDisk(int blockpointer) throws IOException {

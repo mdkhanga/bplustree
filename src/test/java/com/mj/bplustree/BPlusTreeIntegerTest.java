@@ -96,21 +96,60 @@ public class BPlusTreeIntegerTest {
 		
 	}
 	
+	@Test
+	public void testFind() throws IOException {
+		
+		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindexMil.db",4,128, 
+				new IntegerSerDeser(), new IntegerComparator()) ;
+		
+		int l = 613819 ;
+		
+		long ptr = tree.find(l) ;
+		
+		System.out.println(ptr) ;
+		
+		assertTrue(ptr == 613819) ;
+		
+		
+	}
 	
+	
+	@Test
+	public void testDelete() throws IOException {
+		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindex100.db",4,128, 
+				new IntegerSerDeser(), new IntegerComparator()) ;
+		
+		assertTrue(tree.isTreeValid()) ;
+		
+		tree.printTree();
+		
+		tree.delete(73);
+		
+		assertTrue(tree.isTreeValid()) ;
+		
+		assertNull(tree.find(73)) ;
+		
+		tree.printTree();
+		
+		
+		
+	}
 	
 	
 	@Test
 	public void testRead() throws IOException {
-		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindex.db",4,128, 
+		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindex100.db",4,128, 
 				new IntegerSerDeser(), new IntegerComparator()) ;
 		
 		
 		tree.printTree() ;
+		
+		assertTrue(tree.isTreeValid()) ;
 	}
 	
 	@Test
 	public void testValidate() throws IOException {
-		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindexMil.db",4,128, 
+		BPlusTree<Integer> tree = new BPlusTree<Integer>("C:\\mjprojects","intindex100.db",4,128, 
 				new IntegerSerDeser(), new IntegerComparator()) ;
 		
 		

@@ -46,7 +46,7 @@ public class BPlusNode<T>  {
 	// private byte[][] data  = new byte[10][] ; // array of byte arrays 10 records for leaf nodes
 	// for a non leaf node each byte[i][] contain key bytes
 	// for a lead node each byte[i][] contains record bytes
-	private List data = new LinkedList() ; // 10 data items in a leaf node
+	private List<Long> data = new LinkedList<Long>() ; // 10 data items in a leaf node
 	
 	Comparator<T> keyComparator = null ;
 	
@@ -97,9 +97,130 @@ public class BPlusNode<T>  {
 		
 	}
 	
-	public BPlusNode find(String key) {
+	public T find(T key) {
+		
+		int ptr = -1 ;
+		
+		if (!isLeaf()) {
+			
+			
+			int ksize = keys.size();
+			int i ;
+			for (i = 0 ; i < ksize ;i++) {
+				
+				T k = keys.get(i) ;
+				
+				// if (key < k) {
+				if (keyComparator.compare(key, k) < 0 ) {
+					
+					ptr = (Integer)children.get(i) ;
+					// return key ;
+					
+					break ;
+				}
+				
+				
+			}
+		
+			if (ptr == -1)
+				ptr = (Integer)children.get(i) ;
+			
+
+			BPlusNode<T> nextNode = readFromDisk(ptr) ;
+			
+			return nextNode.find(key) ;
+		
+		
+		}
+		
+		// In the leaf node
+		
+		int ksize = keys.size();
+		int i ;
+		for (i = 0 ; i < ksize ;i++) {
+			
+			T k = keys.get(i) ;
+			
+			// if (key < k) {
+			if (keyComparator.compare(key, k) == 0 ) {
+				
+				// ptr = (Integer)children.get(i) ;
+				return key ;
+			}
+			
+			
+		}
+		
 		
 		return null ;
+		
+	}
+	
+	public void delete(T key) {
+		
+		int ptr = -1 ;
+		
+		if (!isLeaf()) {
+			
+			
+			int ksize = keys.size();
+			int i ;
+			for (i = 0 ; i < ksize ;i++) {
+				
+				T k = keys.get(i) ;
+				
+				// if (key < k) {
+				if (keyComparator.compare(key, k) < 0 ) {
+					
+					ptr = (Integer)children.get(i) ;
+					// return key ;
+					
+				  break ;
+				}
+				
+				
+			}
+		
+			if (ptr == -1)
+				ptr = (Integer)children.get(i) ;
+			
+
+			BPlusNode<T> nextNode = readFromDisk(ptr) ;
+			
+			nextNode.delete(key) ;
+			
+			nextNode.writetoDisk();
+			
+			return ;
+		
+		
+		}
+		
+		// In the leaf node
+		
+		int ksize = keys.size();
+		int i ;
+		
+		for (i = 0 ; i < ksize ;i++) {
+					
+					T k = keys.get(i) ;
+					
+					// if (key < k) {
+					if (keyComparator.compare(key, k) == 0 ) {
+						
+						// ptr = (Integer)children.get(i) ;
+						
+						keys.remove(i) ;
+						data.remove(i) ;
+						
+						break ;
+					}
+					
+					
+		}
+				
+				
+		
 	}
 	
 	public boolean isLeaf() {
@@ -128,7 +249,7 @@ public class BPlusNode<T>  {
 	}
 	
 	// return any node created as a result of spliting this node
-	public BPlusNode insert(T key, Object value) {
+	public BPlusNode insert(T key, long value) {
 		
 		
 		if (!isLeaf()) {
@@ -237,7 +358,7 @@ public class BPlusNode<T>  {
 			// for( int i = 5 ; i <= 9 ; i++) {
 			for (int i = s_half_b ; i <= s_half_e ;i++) {
 				T lkey = getKey(i) ;
-				Object ldata = getData(i) ;
+				long ldata = getData(i) ;
 				newnode.insert(lkey, ldata) ;				
 			}
 			
@@ -457,7 +578,7 @@ public class BPlusNode<T>  {
 		return keys.get(index) ;
 	}
 	
-	public byte[] get(T key) {
+	public long get(T key) {
 		
 		// find the index ;
 		int index = 0 ;
@@ -471,9 +592,9 @@ public class BPlusNode<T>  {
 		}
 		
 		if (index == 10) // not found
-			return null ;
+			return -1 ;
 		
-		return (byte[])data.get(index) ;
+		return data.get(index) ;
 		
 	}
 	
@@ -492,7 +613,7 @@ public class BPlusNode<T>  {
 	}
 	
 	
-	public Object getData(int index) {
+	public long getData(int index) {
 		
 		
 		return data.get(index) ;
@@ -580,7 +701,7 @@ public class BPlusNode<T>  {
 		
 		for (int i = 0 ; i < numitems ; i++) {
 			
-			int dataitem = ds.readInt() ;
+			long dataitem = ds.readLong() ;
 			data.add(dataitem) ;
 		}
 		
@@ -612,8 +733,8 @@ public class BPlusNode<T>  {
 		
 		// write each data item
 		for (int i = 0 ; i < num ; i++) {
-			Integer val = (Integer)data.get(i) ;
-			ds.writeInt(val.intValue()) ;
+			long val = data.get(i) ;
+			ds.writeLong(val) ;
 		}
 			
 		// write next block pointer

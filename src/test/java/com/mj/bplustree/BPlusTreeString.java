@@ -19,7 +19,7 @@ public class BPlusTreeString {
 
 	@Test
 	public void testCreate() throws IOException {
-		BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex.db",4,128, 
+		BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex.db",12,128, 
 				new StringSerDeser(),new StringComparator()) ;
 		
 		tree.insert("Apple", 4) ;
@@ -41,7 +41,7 @@ public class BPlusTreeString {
 	@Test
 	public void testCreate20() throws IOException {
 
-	BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex20.db",4,128, 
+	BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex20.db",12,128, 
 			new StringSerDeser(),new StringComparator()) ;
 	
 		for (int i = 1 ; i <= 20 ; i++) {
@@ -58,7 +58,7 @@ public class BPlusTreeString {
 	@Test
 	public void testCreateMil() throws IOException {
 
-	BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex20.db",4,128, 
+	BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindexMil.db",12,128, 
 			new StringSerDeser(),new StringComparator()) ;
 	
 		for (int i = 1 ; i <= 1000000 ; i++) {
@@ -70,6 +70,30 @@ public class BPlusTreeString {
 	assertTrue(tree.isTreeValid()) ;
 	tree.printTree() ;
 
+	}
+	
+	@Test
+	public void read() throws IOException {
+		
+		BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindex20.db",12,128, 
+				new StringSerDeser(),new StringComparator()) ;
+		
+		assertTrue(tree.isTreeValid()) ;
+		
+	}
+	
+	@Test
+	public void find() throws IOException {
+		
+		BPlusTree<String> tree = new BPlusTree<String>("C:\\mjprojects","strindexMil.db",12,128, 
+				new StringSerDeser(),new StringComparator()) ;
+		
+		// String k = tree.find("qvvuuea") ;
+		// zsinvpjpw
+		String k = tree.find("zsinvpjpw") ;
+		
+		assertTrue(k.contentEquals("zsinvpjpw")) ;
+		
 	}
 
 	private String genRandomWord() {
