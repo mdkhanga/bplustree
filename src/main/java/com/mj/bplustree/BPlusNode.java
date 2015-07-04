@@ -858,7 +858,7 @@ public class BPlusNode<T>  {
 		
 		if (isLeaf) {
 			System.out.println("Leaf ") ;
-			System.out.println("Keys : ") ;
+			System.out.println("Keys : " + keys.size()) ;
 			StringBuilder sb = new StringBuilder() ;
 			for (int i = 0 ; i < keys.size() ; i++) {
 				sb.append(keys.get(i) + ",") ;
@@ -874,8 +874,9 @@ public class BPlusNode<T>  {
 		else {
 			
 			System.out.println("Non leaf \n") ;
-			System.out.println("Keys: \n") ;
-			
+			System.out.println("Keys: "+ keys.size() + "keys \n") ;
+
+
 			StringBuilder kb = new StringBuilder() ;
 			for(int i =0 ; i < keys.size(); i++) {
 				kb.append(keys.get(i)) ;

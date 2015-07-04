@@ -19,7 +19,6 @@ public class BPlusTreeIntegerTest {
 					new IntegerSerDeser(), new IntegerComparator()) ;
 		
 		
-		
 		tree.insert(4, 4) ;
 		tree.insert(10, 10) ;
 		tree.insert(20, 20) ;

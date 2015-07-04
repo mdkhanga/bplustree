@@ -52,7 +52,15 @@ public class BPlusTree<T> {
 	
 	public BPlusTree(String storeDir, String filename, int keysize, int recordsize, 
 			        SerDeserializer<T> sd, Comparator<T> kc) throws IOException {
-		String fname = storeDir + "\\" + filename ;
+		
+		
+		String fname = null ;
+		
+		if (storeDir != null && storeDir.length() > 0 ) {
+			fname = storeDir + "\\" + filename ;
+		} else {
+			fname = filename ;
+		}
 		
 		File f = new File(fname) ;
 		
@@ -189,8 +197,10 @@ public class BPlusTree<T> {
 		   
 		byte[] record = bos.toByteArray() ;
 		
-		if (record.length != BLOCK_SIZE)
-			throw new RuntimeException("rec size= "+record.length + " block size=" + BLOCK_SIZE) ;
+		if (record.length != BLOCK_SIZE) {
+            node.printNode();
+            throw new RuntimeException("rec size= " + record.length + " block size=" + BLOCK_SIZE);
+        }
 		
 		
 		treeStore.write(record) ;
