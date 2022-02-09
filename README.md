@@ -8,3 +8,5 @@ As in a B Tree , each node in a B+ tree has multiple keys, with the difference t
 leaf nodes do not have values, you can pack more keys in each node there by reducing the height of the tree.
 
 Used by databases
+
+x
