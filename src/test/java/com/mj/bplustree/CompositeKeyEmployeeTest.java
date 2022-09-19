@@ -45,7 +45,7 @@ public class CompositeKeyEmployeeTest {
 		BPlusTree<Employee> tree = new BPlusTree<Employee>(null,"empindex100.db",38,128,
 				new EmployeeSerDeser(),new EmployeeComparator()) ;
 	
-		for (int i = 1 ; i <= 1000000 ; i++) {
+		for (int i = 1 ; i <= 1000 ; i++) {
 			
 			// if (i == 26) {
 				System.out.println(i) ;
