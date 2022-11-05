@@ -66,18 +66,21 @@ public class BPlusTreeIntegerTest {
 		
 	}
 	
-	/*
+
 	@Test
 	public void testwriteandvalidate1000() throws IOException {
-		
-		BPlusTree<Integer> tree = new BPlusTree<Integer>(null,"intindexMil.db",4,128,
-				new IntegerSerDeser(), new IntegerComparator()) ;
+
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("id", FieldType.integer));
+
+		BPlusTree tree = new BPlusTree(null,"intindex1000.db",4,128,
+				Arrays.asList("id"), tableSpec) ;
 		
 		for (int i = 1 ; i <=1000 ; i++) {
 			
 			System.out.println(i) ;
 			
-			tree.insert(i, i) ;
+			tree.insert(Arrays.asList(i), Arrays.asList(i)) ;
 		}
 		
 		// tree.printTree();
@@ -87,74 +90,60 @@ public class BPlusTreeIntegerTest {
 		assertTrue(tree.isTreeValid()) ;
 		
 	}
-	
+
 	@Test
 	public void testFind() throws IOException {
-		
-		BPlusTree<Integer> tree = new BPlusTree<Integer>(null,"intindexMil.db",4,128,
-				new IntegerSerDeser(), new IntegerComparator()) ;
+
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("id", FieldType.integer));
+
+		BPlusTree tree = new BPlusTree(null,"intindex1000.db",4,128,
+				Arrays.asList("id"), tableSpec) ;
 		
 		// int l = 613819 ;
 		int l = 153;
 		
-		long ptr = tree.find(l) ;
+		List ptr = tree.find(Arrays.asList(l)) ;
 		
-		System.out.println(ptr) ;
+		System.out.println(ptr.get(0)) ;
 		
-		assertTrue(ptr == 153) ;
+		assertTrue((int)ptr.get(0) == 153) ;
 		
 		
 	}
 	
-	
+
 	@Test
 	public void testDelete() throws IOException {
-		BPlusTree<Integer> tree = new BPlusTree<Integer>(null,"intindex100.db",4,128,
-				new IntegerSerDeser(), new IntegerComparator()) ;
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("id", FieldType.integer));
+		BPlusTree tree = new BPlusTree(null,"intindex100.db",4,128,
+				Arrays.asList("id"), tableSpec) ;
 		
 		assertTrue(tree.isTreeValid()) ;
 		
 		tree.printTree();
 		
-		tree.delete(73);
+		tree.delete(Arrays.asList(73));
 		
 		assertTrue(tree.isTreeValid()) ;
 		
-		assertNull(tree.find(73)) ;
+		assertNull(tree.find(Arrays.asList(73))) ;
 		
 		tree.printTree();
 		
 		
 		
 	}
-	
-	
-	@Test
-	public void testRead() throws IOException {
-		BPlusTree<Integer> tree = new BPlusTree<Integer>(null,"intindex100.db",4,128,
-				new IntegerSerDeser(), new IntegerComparator()) ;
-		
-		
-		tree.printTree() ;
-		
-		assertTrue(tree.isTreeValid()) ;
-	}
-	
-	@Test
-	public void testValidate() throws IOException {
-		BPlusTree<Integer> tree = new BPlusTree<Integer>(null,"intindex100.db",4,128,
-				new IntegerSerDeser(), new IntegerComparator()) ;
-		
-		
-		assertTrue(tree.isTreeValid()) ;
-	} */
-	
-	/*
+
+
 	@Test
 	public void printBlocks() throws IOException {
-		
-		BPlusTree tree = new BPlusTree(null","intindex.db",4,128) ;
-		
+
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("id", FieldType.integer));
+		BPlusTree tree = new BPlusTree(null,"intindex100.db",4,128,
+				Arrays.asList("id"), tableSpec) ;
 		BPlusNode node = tree.readFromDisk(0) ;
 		
 		node.printNode() ;
@@ -164,13 +153,13 @@ public class BPlusTreeIntegerTest {
 		
 		BPlusNode node2 = tree.readFromDisk(2) ;
 		node2.printNode() ;
-		
-		BPlusNode node3 = tree.readFromDisk(3) ;
-		node3.printNode() ;
-		
+
+
+		/*
+			BPlusNode node3 = tree.readFromDisk(3) ;
+			node3.printNode() ;
+		*/
 	
-	} */
-	
-	
+	}
 
 }

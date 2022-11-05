@@ -3,8 +3,13 @@ package com.mj.bplustree;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
+import com.mj.bplustree.fields.Field;
+import com.mj.bplustree.fields.FieldType;
 import org.junit.Test;
 
 import com.mj.db.serialization.StringSerDeser;
@@ -17,37 +22,45 @@ public class BPlusTreeString {
 								  'k','l','n','o','p','q','r','s','t','u',
 								  'v','w','x','y','z' } ;
 
-	/*
+
 	@Test
 	public void testCreate() throws IOException {
-		BPlusTree<String> tree = new BPlusTree<String>(null,"strindex.db",12,128,
-				new StringSerDeser(),new StringComparator()) ;
+
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("name", FieldType.string, 10));
+
+		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+				Arrays.asList("name"), tableSpec) ;
+
 		
-		tree.insert("Apple", 4) ;
-		tree.insert("zip", 4) ;
-		tree.insert("ball", 4) ;
-		tree.insert("Tree", 4) ;
-		tree.insert("small", 4) ;
-		tree.insert("color", 4) ;
-		tree.insert("hammer", 4) ;
-		tree.insert("quorum", 4) ;
-		
-		tree.insert("dull",4) ;
-		
-		
+		tree.insert(Arrays.asList("Apple"), Arrays.asList("Apple")) ;
+		tree.insert(Arrays.asList("zip"), Arrays.asList("zip")) ;
+		tree.insert(Arrays.asList("ball"), Arrays.asList("ball")) ;
+		tree.insert(Arrays.asList("Tree"), Arrays.asList("Tree")) ;
+		tree.insert(Arrays.asList("small"), Arrays.asList("small")) ;
+		tree.insert(Arrays.asList("color"), Arrays.asList("color")) ;
+		tree.insert(Arrays.asList("hammer"), Arrays.asList("hammer")) ;
+		tree.insert(Arrays.asList("quorum"), Arrays.asList("quorum")) ;
+		tree.insert(Arrays.asList("dull"), Arrays.asList("dull")) ;
+
 		tree.isTreeValid() ;
 		tree.printTree() ;
 	}
-	
+
+
 	@Test
 	public void testCreate20() throws IOException {
 
-	BPlusTree<String> tree = new BPlusTree<String>(null,"strindex20.db",12,128,
-			new StringSerDeser(),new StringComparator()) ;
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("name", FieldType.string, 10));
+
+		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+				Arrays.asList("name"), tableSpec) ;
 	
 		for (int i = 1 ; i <= 20 ; i++) {
-			
-			tree.insert(genRandomWord(),1) ; 
+
+			String t = genRandomWord();
+			tree.insert(Arrays.asList(t),Arrays.asList(t)) ;
 		}
 	
 	
@@ -55,16 +68,21 @@ public class BPlusTreeString {
 	tree.printTree() ;
 
 	}
+
 
 	@Test
-	public void testCreateMil() throws IOException {
+	public void testCreate1000() throws IOException {
 
-	BPlusTree<String> tree = new BPlusTree<String>(null,"strindexMil.db",12,128,
-			new StringSerDeser(),new StringComparator()) ;
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("name", FieldType.string, 10));
+
+		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+				Arrays.asList("name"), tableSpec) ;
 	
 		for (int i = 1 ; i <= 1000 ; i++) {
-			
-			tree.insert(genRandomWord(),1) ; 
+
+			String t = genRandomWord();
+			tree.insert(Arrays.asList(t), Arrays.asList(t)) ;
 		}
 	
 	
@@ -72,7 +90,8 @@ public class BPlusTreeString {
 	tree.printTree() ;
 
 	}
-	
+
+	/*
 	@Test
 	public void read() throws IOException {
 		
@@ -95,7 +114,7 @@ public class BPlusTreeString {
 		
 		assertTrue(k.contentEquals("zsinvpjpw")) ;
 		
-	}
+	} */
 
 	private String genRandomWord() {
 		
@@ -118,5 +137,5 @@ public class BPlusTreeString {
 		System.out.println(b) ;
 		return b.toString() ;
 	}
-	*/
+
 }

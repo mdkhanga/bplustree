@@ -738,6 +738,7 @@ public class BPlusNode {
 			List val = data.get(i);
 			// TODO fix 100922 write the list
 			// ds.writeLong(val) ;
+			recordSerDeserializer.write(val, ds);
 
 		}
 			
