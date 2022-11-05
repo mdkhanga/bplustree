@@ -6,9 +6,9 @@ import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayDeque;
-import java.util.Comparator;
+import java.util.*;
 
+import com.mj.bplustree.fields.Field;
 import com.mj.db.serialization.SerDeserializer;
 
 
@@ -21,7 +21,7 @@ import com.mj.db.serialization.SerDeserializer;
  */
 
 @SuppressWarnings("unused")
-public class BPlusTree<T> {
+public class BPlusTree {
 
 	private final int BLOCK_SIZE = 1024 ; // bytes
 	// private final int BLOCK_SIZE = 128 ;
@@ -32,17 +32,19 @@ public class BPlusTree<T> {
 	
 	private RandomAccessFile treeStore ;
 	
-	private BPlusNode<T> root = null ;
+	private BPlusNode root = null ;
 	
 	private int nextBlockPointer = 0 ;
 	
 	private boolean newtree = false ;
 	
-	private SerDeserializer<T> keySerDeser ;
-	private Comparator<T> keyComparator ;
-	
-	private int M = 0 ;
-	
+		private int M = 0 ;
+
+	private List<String> keySpec = null ; // fieldnames
+	private List<Field> tableSpec;
+	private Map<String, Field> tableSpecMap = new HashMap<>() ; // fieldname , datatype
+
+	private boolean isClustered = false ;
 	
 	private BPlusTree() {
 		
@@ -51,9 +53,17 @@ public class BPlusTree<T> {
 	
 	
 	public BPlusTree(String storeDir, String filename, int keysize, int recordsize, 
-			        SerDeserializer<T> sd, Comparator<T> kc) throws IOException {
+			        List<String> keySpec, List<Field> tableSpec) throws IOException {
 		
 		
+
+		this.keySpec = keySpec;
+		this.tableSpec = tableSpec;
+
+		for (Field f: tableSpec) {
+			tableSpecMap.put(f.getName(),f) ;
+		}
+
 		String fname = null ;
 		
 		if (storeDir != null && storeDir.length() > 0 ) {
@@ -68,73 +78,62 @@ public class BPlusTree<T> {
 			newtree = false ;
 		} else
 			newtree = true ;
-		
-		keySerDeser = sd ;
-		keyComparator = kc ;
-		
+
 		keysize = keysize ;
 		
 		M = (BLOCK_SIZE - 14)/( keysize + VALUE_SIZE) ;
 		
 		treeStore = new RandomAccessFile(fname,"rw") ;
-		
-		
-		
-		// if (newtree) {
-		//	createmetadata() ;
-		// } else
-			load() ;
+
+		load() ;
 	
-		return ;
 	}
-	
+
+	public List<String> getKeySpec() {
+		return keySpec;
+	}
+
+	public List<Field> getTableSpec() {
+		return tableSpec;
+	}
+
+	public Map<String, Field> getTableSpecMap() {
+		return tableSpecMap;
+	}
+
 	protected int getNumKeysPerBlock() {
-		
 		return M ;
 	}
 	
-	public SerDeserializer<T> getSerDeserializer() {
-		
-		return keySerDeser ;
-	}
-	
-	public Comparator<T> getKeyComparator() {
-		
-		return keyComparator ;
-	}
-	
-	public T find(T key) {
-		
+
+	public List find(List key) {
 		
 		return root.find(key) ;
 	}
 	
 	public byte[] getNext() {
-		
-		
-		
 		return null ;
 	}
 	
 	
-	public void insert(T key, long value) {
+	public void insert(List key, List value) {
 		
-		BPlusNode<T> node = null ;
+		BPlusNode node = null ;
 		
 		if (root == null) {
-			node = new BPlusNode<T>(this) ;
+			node = new BPlusNode(this) ;
 			root = node ;
 			node.setRoot(true) ;
 			node.setLeaf(true) ;
 		}
 		
-		BPlusNode<T> newchild = root.insert(key, value) ;
+		BPlusNode newchild = root.insert(key, value) ;
 		
 		// if a child is returned , it means root was split
 		// we need to create a new nonleaf root
 		if (newchild != null) {
 			
-			BPlusNode<T> newnode = new BPlusNode<T>(this) ;
+			BPlusNode newnode = new BPlusNode(this) ;
 			newnode.setRoot(true) ;
 			newnode.setLeaf(false) ;
 			root.setRoot(false) ;
@@ -150,12 +149,12 @@ public class BPlusTree<T> {
 		
 	}
 	
-	public void delete(T key) {
+	public void delete(List key) {
 		
 		root.delete(key) ;
 	}
 	
-	public BPlusNode<T> readFromDisk(int blockpointer) throws IOException {
+	public BPlusNode readFromDisk(int blockpointer) throws IOException {
 		
 				
 		treeStore.seek(blockpointer*BLOCK_SIZE) ;
@@ -169,12 +168,12 @@ public class BPlusTree<T> {
 		
 			treeStore.readFully(b, 0, BLOCK_SIZE-1) ;
 				
-			return new BPlusNode<T>(this,b,blockpointer) ;
+			return new BPlusNode(this,b,blockpointer) ;
 		} 
 			return null ;
 	}
 	
-	public void writeToDisk(BPlusNode<T> node) throws IOException {
+	public void writeToDisk(BPlusNode node) throws IOException {
 		
 		int pointer = node.getPointer() ;
 		treeStore.seek(pointer*BLOCK_SIZE) ;
@@ -240,15 +239,15 @@ public class BPlusTree<T> {
 			
 		// Breadth first traverse
 		
-		ArrayDeque<NodeBounds<T>> queue = new ArrayDeque<NodeBounds<T>>() ;
+		ArrayDeque<NodeBounds> queue = new ArrayDeque<NodeBounds>() ;
 		
 		
 		queue.addAll(root.getChildrenNodeBounds()) ;
 		
-		NodeBounds<T> current = null ; 
+		NodeBounds current = null ;
 		while( !queue.isEmpty() && (current = queue.poll()) != null) {
 			
-			BPlusNode<T> cNode = readFromDisk(current.blockpointer) ;
+			BPlusNode cNode = readFromDisk(current.blockpointer) ;
 			
 			if (cNode.isNodeValid(current.low, current.high))
 				queue.addAll(cNode.getChildrenNodeBounds()) ;
@@ -256,10 +255,7 @@ public class BPlusTree<T> {
 				return false ;
 			
 		}
-		
-		
-		
-		
+
 		return true ;
 	}
 	
@@ -288,7 +284,7 @@ public class BPlusTree<T> {
 		Integer current = null ; 
 		while( !queue.isEmpty() && (current = queue.poll()) != null) {
 			
-			BPlusNode<T> cNode = readFromDisk(current) ;
+			BPlusNode cNode = readFromDisk(current) ;
 			cNode.printNode() ;
 			queue.addAll(cNode.getChildren()) ;
 			
@@ -312,10 +308,7 @@ public class BPlusTree<T> {
 	}
 	
 	public void printBlock(int i) {
-		
-		
-		
-		
+
 	}
 	
 }

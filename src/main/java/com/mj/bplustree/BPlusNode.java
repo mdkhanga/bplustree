@@ -4,14 +4,15 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
+import com.mj.bplustree.fields.Field;
+import com.mj.db.serialization.KeySerDeserializer;
+import com.mj.db.serialization.RecordSerDeserializer;
 import com.mj.db.serialization.SerDeserializer;
+import com.mj.util.KeyComparator;
 
-public class BPlusNode<T>  {
+public class BPlusNode {
 	
 	// private int M = 4 ; // maximum number of entries per node
 	// 6/29/03 experiment with larger M
@@ -41,16 +42,13 @@ public class BPlusNode<T>  {
 	
 	// private int[] keys = new int[10] ; // 10 keys for non leaf nodes
 	// use list instead
-	private List<T> keys = new LinkedList<T>() ; // 10 keys
+	private List<List> keys = new LinkedList<>() ; // 10 keys For now stick to primitive key ( not compound
 	
 	// private byte[][] data  = new byte[10][] ; // array of byte arrays 10 records for leaf nodes
 	// for a non leaf node each byte[i][] contain key bytes
 	// for a lead node each byte[i][] contains record bytes
-	private List<Long> data = new LinkedList<Long>() ; // 10 data items in a leaf node
-	
-	Comparator<T> keyComparator = null ;
-	
-	
+	private List<List> data = new LinkedList() ; // 10 data items in a leaf node list of list of field values
+
 	private boolean isLeaf = false ;
 	private boolean isRoot = false ;
 	
@@ -61,17 +59,31 @@ public class BPlusNode<T>  {
 	private int nextBlockPointer ; 
 	
 	// temp store for promoted key
-	private T promotedKey ;
+	private List promotedKey ;
 	private int[] promotedChildPtrs ;
 	
-	private SerDeserializer<T> keySerDeser ;
-	
+	private List<Field> tableSpec ;
+
+	private Map<String, Field> tableSpecMap;
+
+	private List<String> keySpec ;
+
+	private KeySerDeserializer keySerDeserializer ;
+	private RecordSerDeserializer recordSerDeserializer ;
+
+	private KeyComparator keyComparator;
+
 	public BPlusNode(BPlusTree tree) {
 		
-		container = tree ;
-		blockpointer = container.getNextBlockPointer() ;
-		keySerDeser = tree.getSerDeserializer() ;
-		keyComparator = tree.getKeyComparator() ;
+		container = tree;
+		blockpointer = container.getNextBlockPointer();
+		keySpec = tree.getKeySpec();
+		tableSpec = tree.getTableSpec();
+		tableSpecMap = tree.getTableSpecMap();
+
+		keySerDeserializer = new KeySerDeserializer(tableSpecMap, keySpec);
+		recordSerDeserializer = new RecordSerDeserializer(tableSpec);
+		keyComparator = new KeyComparator(keySpec, tableSpecMap);
 		
 		M = container.getNumKeysPerBlock() ;
 		
@@ -81,10 +93,13 @@ public class BPlusNode<T>  {
 		
 		container = tree ;
 		this.blockpointer = blockpointer ;
-		keySerDeser = tree.getSerDeserializer() ;
-		keyComparator = tree.getKeyComparator() ;
-		
-		
+		keySpec = tree.getKeySpec() ;
+		tableSpec = tree.getTableSpec() ;
+		tableSpecMap = tree.getTableSpecMap();
+		keySerDeserializer = new KeySerDeserializer(tableSpecMap, keySpec);
+		recordSerDeserializer = new RecordSerDeserializer(tableSpec);
+		keyComparator = new KeyComparator(keySpec, tableSpecMap);
+
 		M = container.getNumKeysPerBlock() ;
 		
 		if (blockpointer == 0)
@@ -97,7 +112,7 @@ public class BPlusNode<T>  {
 		
 	}
 	
-	public T find(T key) {
+	public List find(List key) {
 		
 		int ptr = -1 ;
 		
@@ -108,7 +123,7 @@ public class BPlusNode<T>  {
 			int i ;
 			for (i = 0 ; i < ksize ;i++) {
 				
-				T k = keys.get(i) ;
+				List k = keys.get(i) ;
 				
 				// if (key < k) {
 				if (keyComparator.compare(key, k) < 0 ) {
@@ -126,7 +141,7 @@ public class BPlusNode<T>  {
 				ptr = (Integer)children.get(i) ;
 			
 
-			BPlusNode<T> nextNode = readFromDisk(ptr) ;
+			BPlusNode nextNode = readFromDisk(ptr) ;
 			
 			return nextNode.find(key) ;
 		
@@ -139,13 +154,14 @@ public class BPlusNode<T>  {
 		int i ;
 		for (i = 0 ; i < ksize ;i++) {
 			
-			T k = keys.get(i) ;
+			List k = keys.get(i) ;
 			
 			// if (key < k) {
 			if (keyComparator.compare(key, k) == 0 ) {
 				
 				// ptr = (Integer)children.get(i) ;
-				return key ;
+				// return key ;
+				return data.get(i) ;
 			}
 			
 			
@@ -155,8 +171,9 @@ public class BPlusNode<T>  {
 		return null ;
 		
 	}
+
 	
-	public void delete(T key) {
+	public void delete(List key) {
 		
 		int ptr = -1 ;
 		
@@ -167,7 +184,7 @@ public class BPlusNode<T>  {
 			int i ;
 			for (i = 0 ; i < ksize ;i++) {
 				
-				T k = keys.get(i) ;
+				List k = keys.get(i) ;
 				
 				// if (key < k) {
 				if (keyComparator.compare(key, k) < 0 ) {
@@ -183,16 +200,14 @@ public class BPlusNode<T>  {
 		
 			if (ptr == -1)
 				ptr = (Integer)children.get(i) ;
-			
 
-			BPlusNode<T> nextNode = readFromDisk(ptr) ;
+			BPlusNode nextNode = readFromDisk(ptr) ;
 			
 			nextNode.delete(key) ;
 			
 			nextNode.writetoDisk();
 			
 			return ;
-		
 		
 		}
 		
@@ -203,7 +218,7 @@ public class BPlusNode<T>  {
 		
 		for (i = 0 ; i < ksize ;i++) {
 					
-					T k = keys.get(i) ;
+					List k = keys.get(i) ;
 					
 					// if (key < k) {
 					if (keyComparator.compare(key, k) == 0 ) {
@@ -215,12 +230,7 @@ public class BPlusNode<T>  {
 						
 						break ;
 					}
-					
-					
 		}
-				
-				
-		
 	}
 	
 	public boolean isLeaf() {
@@ -249,9 +259,9 @@ public class BPlusNode<T>  {
 	}
 	
 	// return any node created as a result of spliting this node
-	public BPlusNode insert(T key, long value) {
-		
-		
+	public BPlusNode insert(List key, List value) {
+
+
 		if (!isLeaf()) {
 			
 			int ptr = -1 ;
@@ -259,7 +269,7 @@ public class BPlusNode<T>  {
 			int i ;
 			for (i = 0 ; i < ksize ;i++) {
 				
-				T k = keys.get(i) ;
+				List k = keys.get(i) ;
 				
 				// if (key < k) {
 				if (keyComparator.compare(key, k) < 0 ) {
@@ -275,16 +285,16 @@ public class BPlusNode<T>  {
 				ptr = (Integer)children.get(i) ;
 			
 			
-			BPlusNode<T> nextNode = readFromDisk(ptr) ;
+			BPlusNode nextNode = readFromDisk(ptr) ;
 			
-			BPlusNode<T> newchild = nextNode.insert(key,value) ; // on the way down to the leaf
+			BPlusNode newchild = nextNode.insert(key,value) ; // on the way down to the leaf
 			nextNode.writetoDisk() ;
 			
 			if (newchild == null)
 				return null ;
 
 			
-			T skey = newchild.getPromotedKey() ;
+			List skey = newchild.getPromotedKey() ;
 			
 			
 			int[] pointers = newchild.getPromotedPointers() ;
@@ -306,7 +316,7 @@ public class BPlusNode<T>  {
 				for (int i = 0 ; i < size ; i++) {
 					
 					// int k = (Integer)keys.get(i) ;
-					T k = keys.get(i) ;
+					List k = keys.get(i) ;
 					// if (key < k) {
 					if (keyComparator.compare(key, k) < 0) {
 						keys.add(i,key) ;
@@ -347,7 +357,7 @@ public class BPlusNode<T>  {
 			// split the leaf Node
 			
 			// create a new leaf node
-			BPlusNode<T> newnode = new BPlusNode<T>(container) ;
+			BPlusNode newnode = new BPlusNode(container) ;
 			newnode.setLeaf(true) ;
 			
 			// move last 5 of new list to new node
@@ -357,12 +367,12 @@ public class BPlusNode<T>  {
 			
 			// for( int i = 5 ; i <= 9 ; i++) {
 			for (int i = s_half_b ; i <= s_half_e ;i++) {
-				T lkey = getKey(i) ;
-				long ldata = getData(i) ;
+				List lkey = getKey(i) ;
+				List ldata = getData(i) ;
 				newnode.insert(lkey, ldata) ;				
 			}
 			
-			T promotedkey = getKey(s_half_b) ;
+			List promotedkey = getKey(s_half_b) ;
 			
 			// remove the keys/data that have been copied
 			for (int i = s_half_e ; i >= s_half_b ;i--) {
@@ -378,8 +388,7 @@ public class BPlusNode<T>  {
 			promotedpointers[0] = getPointer() ;
 			promotedpointers[1] = newnode.getPointer() ;
 			newnode.setPromotedPointers(promotedpointers) ;
-		
-			
+
 			writetoDisk() ;
 			newnode.writetoDisk() ;
 			
@@ -394,7 +403,7 @@ public class BPlusNode<T>  {
 	
 	
 	// public BPlusNode insert(int key,int blockpointer) {
-	public BPlusNode insert(T key,int[] blockpointer) {	
+	public BPlusNode insert(List key, int[] blockpointer) {
 		if (isLeaf()) {
 			
 			throw new RuntimeException("Method Applies only to Non Leaf nodes") ;
@@ -407,7 +416,7 @@ public class BPlusNode<T>  {
 			boolean foundpos = false ;
 			for (int i = 0 ; i < size ; i++) {
 				
-				T k = keys.get(i) ;
+				List k = keys.get(i) ;
 				// if (key < k) {
 				if (keyComparator.compare(key,k) < 0 ) {
 					keys.add(i,key) ;
@@ -446,8 +455,7 @@ public class BPlusNode<T>  {
 		// create a new non leaf node
 		// move half of new keys & pointers to newnode
 		// return newNode
-				
-				
+
 		BPlusNode newnode = new BPlusNode(container) ;
 		newnode.setLeaf(false) ;
 		
@@ -460,7 +468,7 @@ public class BPlusNode<T>  {
 		int s_half_e = size -1 ;
 		
 		for( int i = s_half_b+1 ; i <= s_half_e ; i++) {
-			T lkey = getKey(i) ;
+			List lkey = getKey(i) ;
 			newnode.appendKey(lkey) ;
 		}
 		
@@ -498,9 +506,7 @@ public class BPlusNode<T>  {
 	}
 	
 	
-	public T getSmallestKey() {
-		
-		
+	public Object getSmallestKey() {
 		return keys.get(0) ;
 	}
 	
@@ -514,15 +520,15 @@ public class BPlusNode<T>  {
 		return children ;
 	}
 	
-	public List<NodeBounds<T>> getChildrenNodeBounds() {
+	public List<NodeBounds> getChildrenNodeBounds() {
 		
-		List<NodeBounds<T>> clist = new ArrayList<NodeBounds<T>>() ;
+		List<NodeBounds> clist = new ArrayList<NodeBounds>() ;
 		int numchildren = children.size();
 		
 		for (int i =0 ; i < numchildren ; i++ ) {
 			
-			T low = null ;
-			T high = null ;
+			List low = new ArrayList() ;
+			List high = new ArrayList() ;
 			int ptr ;
 			
 			if (i == 0) {
@@ -541,7 +547,7 @@ public class BPlusNode<T>  {
 			
 			ptr = children.get(i) ;
 			
-			NodeBounds<T> n = new NodeBounds<T>(low,high,ptr) ;
+			NodeBounds n = new NodeBounds(low,high,ptr) ;
 			clist.add(n) ;
 		}
 		
@@ -555,7 +561,7 @@ public class BPlusNode<T>  {
 		if (!isRoot)
 			throw new RuntimeException("Method should be called for root only!") ;
 		
-		T key = (T)newchild.getPromotedKey() ;
+		List key = newchild.getPromotedKey() ;
 		
 		appendKey(key) ;
 		
@@ -565,24 +571,19 @@ public class BPlusNode<T>  {
 		appendChildPtr(oldroot.getPointer()) ; // old root has moved so we need the new pointer
 		appendChildPtr(promotedPointers[1]) ;
 
-		/*
-		appendKey(newchild.getSmallestKey()) ;		
-		appendChildPtr(oldroot.getPointer()) ;
-		appendChildPtr(newchild.getPointer()) ;
-		*/
 		
 	}
 	
-	public T getKey(int index) {
+	public List getKey(int index) {
 		
 		return keys.get(index) ;
 	}
 	
-	public long get(T key) {
+	public List get(List key) {
 		
 		// find the index ;
 		int index = 0 ;
-		for (T k : keys) {
+		for (List k : keys) {
 			
 			// if (k == key)
 			if (keyComparator.compare(k, key) == 0)
@@ -592,7 +593,7 @@ public class BPlusNode<T>  {
 		}
 		
 		if (index == 10) // not found
-			return -1 ;
+			return null ;
 		
 		return data.get(index) ;
 		
@@ -613,7 +614,7 @@ public class BPlusNode<T>  {
 	}
 	
 	
-	public long getData(int index) {
+	public List getData(int index) {
 		
 		
 		return data.get(index) ;
@@ -625,11 +626,11 @@ public class BPlusNode<T>  {
 		data.remove(index) ;
 	}
 	
-	public void setPromotedKey(T key) {
+	public void setPromotedKey(List key) {
 		promotedKey = key ;
 	}
 	
-	public T getPromotedKey() {
+	public List getPromotedKey() {
 		return promotedKey ;
 	}
 	
@@ -641,7 +642,7 @@ public class BPlusNode<T>  {
 		return promotedChildPtrs ;
 	}
 	 
-	public void appendKey(T key) {
+	public void appendKey(List key) {
 		// add key to the end
 		keys.add(key) ;
 	}
@@ -691,9 +692,8 @@ public class BPlusNode<T>  {
 			
 						
 			// int key = ds.readInt() ;
-			T key = keySerDeser.read(ds) ;
-			
-			
+			List key = keySerDeserializer.read(ds) ;
+
 			keys.add(key) ;
 		}
 		
@@ -701,8 +701,10 @@ public class BPlusNode<T>  {
 		
 		for (int i = 0 ; i < numitems ; i++) {
 			
-			long dataitem = ds.readLong() ;
-			data.add(dataitem) ;
+			// 100922 long dataitem = ds.readLong() ;
+			// 100922 need tofix data.add(dataitem) ;
+			List dataitem = recordSerDeserializer.read(ds);
+			data.add(dataitem);
 		}
 		
 		this.nextBlockPointer = ds.readInt() ;
@@ -721,9 +723,8 @@ public class BPlusNode<T>  {
 		ds.writeInt(knum) ;
 		// write each key
 		for (int i = 0 ; i < knum ; i++) {
-			T val = keys.get(i) ;
-			// ds.writeInt(val.intValue()) ;
-			keySerDeser.write(val,ds) ;
+			List val = keys.get(i) ;
+			keySerDeserializer.write(val,ds) ;
 		}
 		
 		
@@ -733,8 +734,11 @@ public class BPlusNode<T>  {
 		
 		// write each data item
 		for (int i = 0 ; i < num ; i++) {
-			long val = data.get(i) ;
-			ds.writeLong(val) ;
+			// long val = data.get(i) ;
+			List val = data.get(i);
+			// TODO fix 100922 write the list
+			// ds.writeLong(val) ;
+
 		}
 			
 		// write next block pointer
@@ -750,7 +754,7 @@ public class BPlusNode<T>  {
 		for (int i = 0 ; i < num_keys ; i++) {
 			
 			// int key = ds.readInt();
-			T key = keySerDeser.read(ds) ;
+			List key = keySerDeserializer.read(ds) ;
 			keys.add(key) ;
 			
 		}
@@ -781,9 +785,9 @@ public class BPlusNode<T>  {
 		for(int i = 0 ; i < num_keys ; i++) {
 			
 			// Integer key = keys.get(i) ;
-			T val = keys.get(i) ;
+			List val = keys.get(i) ;
 			// ds.writeInt(key.intValue()) ;
-			keySerDeser.write(val,ds) ;
+			keySerDeserializer.write(val,ds) ;
 			
 		}
 		
@@ -798,10 +802,7 @@ public class BPlusNode<T>  {
 			ds.writeInt(ptr.intValue()) ;
 			
 		}
-		
-		
-		
-		
+
 	}
 
 	
@@ -827,12 +828,12 @@ public class BPlusNode<T>  {
 	}
 	
 	
-	public boolean isNodeValid(T low, T high) {
+	public boolean isNodeValid(List low, List high) {
 		
 		System.out.println("validating node at block " + this.blockpointer) ;
 		
 		for (int i = 0 ; i < keys.size() ; i++) {
-			T key = keys.get(i) ;
+			List key = keys.get(i) ;
 			
 			if (keyComparator.compare(low, key) <=0 && keyComparator.compare(key, high) <= 0)
 				continue ;
@@ -905,7 +906,7 @@ public class BPlusNode<T>  {
 	}
 
 	// @Override
-	public int compare(T arg0, T arg1) {
+	public int compare(Object arg0, Object arg1) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

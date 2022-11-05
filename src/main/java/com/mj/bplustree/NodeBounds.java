@@ -1,12 +1,14 @@
 package com.mj.bplustree;
 
-public class NodeBounds<T> {
+import java.util.List;
 
-	public T low ;
-	public T high ;
+public class NodeBounds {
+
+	public List low ;
+	public List high ;
 	public int blockpointer ;
 	
-	public NodeBounds(T l, T h, int b) {
+	public NodeBounds(List l, List h, int b) {
 		
 		low = l ;
 		high = h ;

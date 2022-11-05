@@ -17,6 +17,7 @@ public class BPlusTreeString {
 								  'k','l','n','o','p','q','r','s','t','u',
 								  'v','w','x','y','z' } ;
 
+	/*
 	@Test
 	public void testCreate() throws IOException {
 		BPlusTree<String> tree = new BPlusTree<String>(null,"strindex.db",12,128,
@@ -117,5 +118,5 @@ public class BPlusTreeString {
 		System.out.println(b) ;
 		return b.toString() ;
 	}
-	
+	*/
 }

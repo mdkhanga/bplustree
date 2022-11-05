@@ -16,6 +16,7 @@ public class CompositeKeyEmployeeTest {
 		  'k','l','n','o','p','q','r','s','t','u',
 		  'v','w','x','y','z' } ;
 
+	/*
 	@Test
 	public void testBasicCreate() throws IOException {
 		BPlusTree<Employee> tree = new BPlusTree<Employee>(null,"empindex.db",34,128, 
@@ -81,6 +82,6 @@ private String genRandomWord(int maxsize) {
 		return b.toString() ;
 	}
 	
-	
+	*/
 	
 }
