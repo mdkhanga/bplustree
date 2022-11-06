@@ -22,7 +22,7 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
-		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex.db",
 				Arrays.asList("id"), tableSpec) ;
 		
 		
@@ -51,7 +51,7 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 		
-		BPlusTree tree = new BPlusTree(null,"intindex100.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex100.db",
 				Arrays.asList("id"), tableSpec) ;
 
 		
@@ -73,7 +73,7 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
-		BPlusTree tree = new BPlusTree(null,"intindex1000.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex1000.db",
 				Arrays.asList("id"), tableSpec) ;
 		
 		for (int i = 1 ; i <=1000 ; i++) {
@@ -97,7 +97,7 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
-		BPlusTree tree = new BPlusTree(null,"intindex1000.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex1000.db",
 				Arrays.asList("id"), tableSpec) ;
 		
 		// int l = 613819 ;
@@ -117,7 +117,7 @@ public class BPlusTreeIntegerTest {
 	public void testDelete() throws IOException {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
-		BPlusTree tree = new BPlusTree(null,"intindex100.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex100.db",
 				Arrays.asList("id"), tableSpec) ;
 		
 		assertTrue(tree.isTreeValid()) ;
@@ -142,7 +142,7 @@ public class BPlusTreeIntegerTest {
 
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
-		BPlusTree tree = new BPlusTree(null,"intindex100.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"intindex100.db",
 				Arrays.asList("id"), tableSpec) ;
 		BPlusNode node = tree.readFromDisk(0) ;
 		

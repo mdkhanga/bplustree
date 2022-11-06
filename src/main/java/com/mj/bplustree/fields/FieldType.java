@@ -4,5 +4,5 @@ public enum FieldType {
     integer,
     string,
     bool,
-    flt
+    decimal
 }

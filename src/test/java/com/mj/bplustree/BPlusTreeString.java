@@ -29,7 +29,7 @@ public class BPlusTreeString {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("name", FieldType.string, 10));
 
-		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"strindex.db",
 				Arrays.asList("name"), tableSpec) ;
 
 		
@@ -54,7 +54,7 @@ public class BPlusTreeString {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("name", FieldType.string, 10));
 
-		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"strindex20.db",
 				Arrays.asList("name"), tableSpec) ;
 	
 		for (int i = 1 ; i <= 20 ; i++) {
@@ -76,7 +76,7 @@ public class BPlusTreeString {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("name", FieldType.string, 10));
 
-		BPlusTree tree = new BPlusTree(null,"intindex.db",4,128,
+		BPlusTree tree = new BPlusTree(null,"strindex1000.db",
 				Arrays.asList("name"), tableSpec) ;
 	
 		for (int i = 1 ; i <= 1000 ; i++) {
@@ -91,30 +91,23 @@ public class BPlusTreeString {
 
 	}
 
-	/*
+
+
 	@Test
-	public void read() throws IOException {
-		
-		BPlusTree<String> tree = new BPlusTree<String>(null,"strindex20.db",12,128,
-				new StringSerDeser(),new StringComparator()) ;
-		
-		assertTrue(tree.isTreeValid()) ;
-		
-	}
-	
-	// @Test
 	public void find() throws IOException {
-		
-		BPlusTree<String> tree = new BPlusTree<String>(null,"strindexMil.db",12,128,
-				new StringSerDeser(),new StringComparator()) ;
+		List<Field> tableSpec = new ArrayList<>();
+		tableSpec.add(new Field("name", FieldType.string, 10));
+
+		BPlusTree tree = new BPlusTree(null,"strindex.db",
+				Arrays.asList("name"), tableSpec) ;
 		
 		// String k = tree.find("qvvuuea") ;
 		// zsinvpjpw
-		String k = tree.find("zsinvpjpw") ;
+		List k = tree.find(Arrays.asList("small")) ;
+		String s = (String)k.get(0);
+		assertTrue(s.contentEquals("small")) ;
 		
-		assertTrue(k.contentEquals("zsinvpjpw")) ;
-		
-	} */
+	}
 
 	private String genRandomWord() {
 		

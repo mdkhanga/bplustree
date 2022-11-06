@@ -27,4 +27,22 @@ public class Field {
     public int getLength() {
         return len ;
     }
+
+    public int getSize() {
+
+        switch(fieldType) {
+            case integer:
+                return 4;
+            case string:
+                return len*2;
+            case bool:
+                return 1;
+            case decimal:
+                return 4;
+            default:
+                return 8;
+
+        }
+
+    }
 }

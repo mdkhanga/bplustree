@@ -29,6 +29,7 @@ public class BPlusTree {
 	private final int VALUE_SIZE = 8 ; //long
 	
 	private int keysize ;
+	private int recordsize;
 	
 	private RandomAccessFile treeStore ;
 	
@@ -52,8 +53,7 @@ public class BPlusTree {
 	}
 	
 	
-	public BPlusTree(String storeDir, String filename, int keysize, int recordsize, 
-			        List<String> keySpec, List<Field> tableSpec) throws IOException {
+	public BPlusTree(String storeDir, String filename, List<String> keySpec, List<Field> tableSpec) throws IOException {
 		
 		
 
@@ -79,7 +79,8 @@ public class BPlusTree {
 		} else
 			newtree = true ;
 
-		keysize = keysize ;
+		keysize = calcKeySize() ;
+		recordsize = calcRecordSize() ;
 		
 		M = (BLOCK_SIZE - 14)/( keysize + VALUE_SIZE) ;
 		
@@ -88,6 +89,25 @@ public class BPlusTree {
 		load() ;
 	
 	}
+
+	private int calcRecordSize() {
+		int size = 0 ;
+		for (Field f: tableSpec) {
+			size = size + f.getSize();
+		}
+		return size;
+	}
+
+	private int calcKeySize() {
+		int size = 0;
+		for (String s: keySpec) {
+			size = size + tableSpecMap.get(s).getSize();
+		}
+		return size;
+	}
+
+
+
 
 	public List<String> getKeySpec() {
 		return keySpec;
