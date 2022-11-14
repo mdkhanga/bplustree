@@ -830,9 +830,7 @@ public class BPlusNode {
 	
 	
 	public boolean isNodeValid(List low, List high) {
-		
-		System.out.println("validating node at block " + this.blockpointer) ;
-		
+
 		for (int i = 0 ; i < keys.size() ; i++) {
 			List key = keys.get(i) ;
 			

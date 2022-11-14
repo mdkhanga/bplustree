@@ -80,9 +80,13 @@ public class BPlusTree {
 			newtree = true ;
 
 		keysize = calcKeySize() ;
+		System.out.println("keysize is " + keysize) ;
 		recordsize = calcRecordSize() ;
-		
-		M = (BLOCK_SIZE - 14)/( keysize + VALUE_SIZE) ;
+		System.out.println("recordsize is " + recordsize) ;
+
+		// TODO: leaf should just have record . key & record is duplicating key which is already in the record
+		M = (BLOCK_SIZE - 14)/( keysize + recordsize) ;
+		System.out.println("M is " + M) ;
 		
 		treeStore = new RandomAccessFile(fname,"rw") ;
 
@@ -220,8 +224,7 @@ public class BPlusTree {
             node.printNode();
             throw new RuntimeException("rec size= " + record.length + " block size=" + BLOCK_SIZE);
         }
-		
-		
+
 		treeStore.write(record) ;
 		
 		

@@ -3,8 +3,13 @@ package com.mj.bplustree;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
+import com.mj.bplustree.fields.Field;
+import com.mj.bplustree.fields.FieldType;
 import org.junit.Test;
 
 import com.mj.db.serialization.StringSerDeser;
@@ -16,42 +21,59 @@ public class CompositeKeyEmployeeTest {
 		  'k','l','n','o','p','q','r','s','t','u',
 		  'v','w','x','y','z' } ;
 
-	/*
+
 	@Test
 	public void testBasicCreate() throws IOException {
-		BPlusTree<Employee> tree = new BPlusTree<Employee>(null,"empindex.db",34,128, 
-				new EmployeeSerDeser(),new EmployeeComparator()) ;
+
+		List<Field> tableSpec = new ArrayList<>();
+
+		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("firstname", FieldType.string, 10));
+		tableSpec.add(new Field("lastname", FieldType.string, 10));
+		tableSpec.add(new Field("salary", FieldType.integer));
+
+
+		BPlusTree tree = new BPlusTree(null,"empindex.db",
+				Arrays.asList("lastname", "firstname"), tableSpec) ;
 		
-		tree.insert(new Employee(1,"Nori","Aoki"), 1);
-		tree.insert(new Employee(2,"Joe","Panik"), 1);
-		tree.insert(new Employee(3,"Angel","Pagan"), 1);
-		tree.insert(new Employee(4,"Buster","Posey"), 1);
-		tree.insert(new Employee(5,"Brandon","Belt"), 1);
-		tree.insert(new Employee(6,"Brandon","Crawford"), 1);
-		tree.insert(new Employee(7,"Joe","Maxwell"), 1);
-		tree.insert(new Employee(8,"Matt","Duff"), 1);
-		tree.insert(new Employee(9,"Tim","Lincicum"), 1);
-		tree.insert(new Employee(10,"Santiago","Casilla"), 1);
-		
-		
+		tree.insert(Arrays.asList("Aoki","Nori"), Arrays.asList(1,"Nori","Aoki",5000));
+		tree.insert(Arrays.asList("Panik","Joe"), Arrays.asList(2,"Joe","Panik",5200));
+		tree.insert(Arrays.asList("Pagan","Angel"), Arrays.asList(3,"Angel","Pagan",5400));
+		tree.insert(Arrays.asList("Posey","Buster"), Arrays.asList(4,"Buster","Posey",5600));
+		tree.insert(Arrays.asList("Belt","Brandon"), Arrays.asList(5,"Brandon","Belt",5800));
+		tree.insert(Arrays.asList("Crawford","Brandon"), Arrays.asList(6,"Brandon","Crawford",6000));
+		tree.insert(Arrays.asList("Maxwell","Joe"), Arrays.asList(7,"Joe","Maxwell",6200));
+		tree.insert(Arrays.asList("Duff","Matt"), Arrays.asList(8,"Matt","Duffy",6275));
+		tree.insert(Arrays.asList("Maxwell","Joe"), Arrays.asList(9,"Joe","Maxwell",6348));
+		tree.insert(Arrays.asList("Lincicum","Tim"), Arrays.asList(10,"Tim","Lincicum",6493));
+		tree.insert(Arrays.asList("Casilla","Santiago"), Arrays.asList(11,"Santiago","Casilla",6777));
+
+
 		assertTrue(tree.isTreeValid()) ;
 		
 		tree.printTree();
 	}
 	
-	
+
 	@Test
 	public void testCreate100() throws IOException {
 
-		BPlusTree<Employee> tree = new BPlusTree<Employee>(null,"empindex100.db",38,128,
-				new EmployeeSerDeser(),new EmployeeComparator()) ;
+		List<Field> tableSpec = new ArrayList<>();
+
+		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("firstname", FieldType.string, 10));
+		tableSpec.add(new Field("lastname", FieldType.string, 10));
+		tableSpec.add(new Field("salary", FieldType.integer));
+
+		BPlusTree tree = new BPlusTree(null,"empindex100.db",
+				Arrays.asList("lastname", "firstname"), tableSpec) ;
 	
 		for (int i = 1 ; i <= 1000 ; i++) {
 			
-			// if (i == 26) {
-				System.out.println(i) ;
-			// }
-			tree.insert(new Employee(i,genRandomWord(10),genRandomWord(20)),1) ; 
+			String firstname = genRandomWord(10);
+			String lastname = genRandomWord(20);
+
+			tree.insert(Arrays.asList(lastname, firstname), Arrays.asList(i, firstname, lastname, 21*i)) ;
 		}
 	
 	
@@ -60,7 +82,7 @@ public class CompositeKeyEmployeeTest {
 
 	}
 
-private String genRandomWord(int maxsize) {
+	private String genRandomWord(int maxsize) {
 		
 		Random r = new Random() ;
 		
@@ -82,6 +104,6 @@ private String genRandomWord(int maxsize) {
 		return b.toString() ;
 	}
 	
-	*/
+
 	
 }
