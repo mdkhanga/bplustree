@@ -16,8 +16,9 @@ public class BPlusNode {
 	
 	// private int M = 4 ; // maximum number of entries per node
 	// 6/29/03 experiment with larger M
-	private int M = 0 ;
-	
+	private int Mleaf = 0 ;
+	private int Mnonleaf=0;
+
 	private int blockpointer ; // address within disk for this block
 	
 	// leaf node size is 1024 bytes
@@ -38,7 +39,7 @@ public class BPlusNode {
 	//  10 keys per node = 40 bytes
 	// 11 block pointers = 44 bytes
 	// private int[] children = new int[11] ; // pointers to child Node blocks
-	private List<Integer> children = new LinkedList<Integer>() ; // 11 child pointers
+	private List<Integer> children = new LinkedList<Integer>() ;
 	
 	// private int[] keys = new int[10] ; // 10 keys for non leaf nodes
 	// use list instead
@@ -66,6 +67,8 @@ public class BPlusNode {
 
 	private Map<String, Field> tableSpecMap;
 
+	private Map<String, Integer> fieldPostionMap ;
+
 	private List<String> keySpec ;
 
 	private KeySerDeserializer keySerDeserializer ;
@@ -80,12 +83,14 @@ public class BPlusNode {
 		keySpec = tree.getKeySpec();
 		tableSpec = tree.getTableSpec();
 		tableSpecMap = tree.getTableSpecMap();
+		fieldPostionMap = tree.getFieldPositionMap();
 
 		keySerDeserializer = new KeySerDeserializer(tableSpecMap, keySpec);
 		recordSerDeserializer = new RecordSerDeserializer(tableSpec);
 		keyComparator = new KeyComparator(keySpec, tableSpecMap);
-		
-		M = container.getNumKeysPerBlock() ;
+
+		Mnonleaf = container.getNumKeysPerBlock() ;
+		Mleaf = container.getNumRecordsPerBlock();
 		
 	}
 	
@@ -96,11 +101,13 @@ public class BPlusNode {
 		keySpec = tree.getKeySpec() ;
 		tableSpec = tree.getTableSpec() ;
 		tableSpecMap = tree.getTableSpecMap();
+		fieldPostionMap = tree.getFieldPositionMap();
 		keySerDeserializer = new KeySerDeserializer(tableSpecMap, keySpec);
 		recordSerDeserializer = new RecordSerDeserializer(tableSpec);
 		keyComparator = new KeyComparator(keySpec, tableSpecMap);
 
-		M = container.getNumKeysPerBlock() ;
+		Mnonleaf = container.getNumKeysPerBlock() ;
+		Mleaf = container.getNumRecordsPerBlock();
 		
 		if (blockpointer == 0)
 			isRoot = true ;
@@ -347,7 +354,7 @@ public class BPlusNode {
 				
 				
 				size = keys.size() ;
-				if (size <= M) {
+				if (size <= Mleaf) {
 				
 					writetoDisk() ;
 					return null ;
@@ -361,7 +368,7 @@ public class BPlusNode {
 			newnode.setLeaf(true) ;
 			
 			// move last 5 of new list to new node
-			int s_half_b = M/2  ;
+			int s_half_b = Mleaf/2  ;
 			// int s_half_e = M -1 ;
 			int s_half_e = size - 1 ;
 			
@@ -444,7 +451,7 @@ public class BPlusNode {
 			}
 				
 			size = keys.size() ;
-			if (size <= M) {
+			if (size <= Mnonleaf) {
 				writetoDisk() ;
 				return null ;
 			}
@@ -464,7 +471,7 @@ public class BPlusNode {
 		
 		
 		// move half of new list to new node
-		int s_half_b = M/2   ;
+		int s_half_b = Mnonleaf/2   ;
 		int s_half_e = size -1 ;
 		
 		for( int i = s_half_b+1 ; i <= s_half_e ; i++) {
@@ -686,7 +693,7 @@ public class BPlusNode {
 	
 	private void readLeaf(DataInputStream ds) throws IOException {
 		
-		int numkeys = ds.readInt() ;
+		/* int numkeys = ds.readInt() ;
 		
 		for (int i = 0 ; i < numkeys ; i++) {
 			
@@ -695,7 +702,7 @@ public class BPlusNode {
 			List key = keySerDeserializer.read(ds) ;
 
 			keys.add(key) ;
-		}
+		} */
 		
 		int numitems = ds.readInt() ;
 		
@@ -705,9 +712,21 @@ public class BPlusNode {
 			// 100922 need tofix data.add(dataitem) ;
 			List dataitem = recordSerDeserializer.read(ds);
 			data.add(dataitem);
+			List key = keyFromRecord(dataitem);
+			keys.add(key);
 		}
 		
 		this.nextBlockPointer = ds.readInt() ;
+	}
+
+	private List keyFromRecord(List dataitem) {
+
+		List ret = new ArrayList();
+		for (String fieldName: keySpec) {
+			Object val = dataitem.get(fieldPostionMap.get(fieldName));
+			ret.add(val);
+		}
+		return ret;
 	}
 	
 	public void writeLeaf(DataOutputStream ds) throws IOException {
@@ -719,13 +738,13 @@ public class BPlusNode {
 		ds.writeByte(1) ;
 		
 		// write num of keys
-		int knum = keys.size() ;
+		/* int knum = keys.size() ;
 		ds.writeInt(knum) ;
 		// write each key
 		for (int i = 0 ; i < knum ; i++) {
 			List val = keys.get(i) ;
 			keySerDeserializer.write(val,ds) ;
-		}
+		} */
 		
 		
 		// write int num of data items

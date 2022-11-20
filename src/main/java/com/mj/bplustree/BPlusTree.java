@@ -39,11 +39,13 @@ public class BPlusTree {
 	
 	private boolean newtree = false ;
 	
-		private int M = 0 ;
+	private int Mleaf = 0 ;
+	private int Mnonleaf = 0;
 
 	private List<String> keySpec = null ; // fieldnames
 	private List<Field> tableSpec;
 	private Map<String, Field> tableSpecMap = new HashMap<>() ; // fieldname , datatype
+	private Map<String, Integer> fieldPositionMap = new HashMap<>(); // fieldname, position in record 1 ... n
 
 	private boolean isClustered = false ;
 	
@@ -60,8 +62,11 @@ public class BPlusTree {
 		this.keySpec = keySpec;
 		this.tableSpec = tableSpec;
 
+		int i = 0;
 		for (Field f: tableSpec) {
 			tableSpecMap.put(f.getName(),f) ;
+			fieldPositionMap.put(f.getName(),i);
+			i++;
 		}
 
 		String fname = null ;
@@ -85,9 +90,11 @@ public class BPlusTree {
 		System.out.println("recordsize is " + recordsize) ;
 
 		// TODO: leaf should just have record . key & record is duplicating key which is already in the record
-		M = (BLOCK_SIZE - 14)/( keysize + recordsize) ;
-		System.out.println("M is " + M) ;
-		
+		Mleaf = (BLOCK_SIZE - 14)/( recordsize) ;
+		Mnonleaf = (BLOCK_SIZE - 14)/( recordsize) ;
+		System.out.println("Mleaf is " + Mleaf) ;
+		System.out.println("Mnonleaf is " + Mleaf) ;
+
 		treeStore = new RandomAccessFile(fname,"rw") ;
 
 		load() ;
@@ -125,8 +132,16 @@ public class BPlusTree {
 		return tableSpecMap;
 	}
 
+	public Map<String, Integer> getFieldPositionMap() {
+		return fieldPositionMap;
+	}
+
 	protected int getNumKeysPerBlock() {
-		return M ;
+		return Mnonleaf ;
+	}
+
+	protected int getNumRecordsPerBlock() {
+		return Mleaf ;
 	}
 	
 
