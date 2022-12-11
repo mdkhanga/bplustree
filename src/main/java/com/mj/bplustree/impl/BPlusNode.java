@@ -1,4 +1,4 @@
-package com.mj.bplustree;
+package com.mj.bplustree.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -6,10 +6,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import com.mj.bplustree.NodeBounds;
 import com.mj.bplustree.fields.Field;
 import com.mj.db.serialization.KeySerDeserializer;
 import com.mj.db.serialization.RecordSerDeserializer;
-import com.mj.db.serialization.SerDeserializer;
 import com.mj.util.KeyComparator;
 
 public class BPlusNode {
@@ -53,7 +53,7 @@ public class BPlusNode {
 	private boolean isLeaf = false ;
 	private boolean isRoot = false ;
 	
-	private BPlusTree container = null ;
+	private BPlusTreeImpl container = null ;
 	
 	// For Leaf node pointer to next sibling
 	// BPlusNode next ;
@@ -76,7 +76,7 @@ public class BPlusNode {
 
 	private KeyComparator keyComparator;
 
-	public BPlusNode(BPlusTree tree) {
+	public BPlusNode(BPlusTreeImpl tree) {
 		
 		container = tree;
 		blockpointer = container.getNextBlockPointer();
@@ -94,7 +94,7 @@ public class BPlusNode {
 		
 	}
 	
-	public BPlusNode(BPlusTree tree, byte[] b, int blockpointer) throws IOException {
+	public BPlusNode(BPlusTreeImpl tree, byte[] b, int blockpointer) throws IOException {
 		
 		container = tree ;
 		this.blockpointer = blockpointer ;
@@ -266,8 +266,9 @@ public class BPlusNode {
 	}
 	
 	// return any node created as a result of spliting this node
-	public BPlusNode insert(List key, List value) {
+	public BPlusNode insert( List value) {
 
+		List key = keyFromRecord(value);
 
 		if (!isLeaf()) {
 			
@@ -294,7 +295,7 @@ public class BPlusNode {
 			
 			BPlusNode nextNode = readFromDisk(ptr) ;
 			
-			BPlusNode newchild = nextNode.insert(key,value) ; // on the way down to the leaf
+			BPlusNode newchild = nextNode.insert(value) ; // on the way down to the leaf
 			nextNode.writetoDisk() ;
 			
 			if (newchild == null)
@@ -376,7 +377,7 @@ public class BPlusNode {
 			for (int i = s_half_b ; i <= s_half_e ;i++) {
 				List lkey = getKey(i) ;
 				List ldata = getData(i) ;
-				newnode.insert(lkey, ldata) ;				
+				newnode.insert(ldata) ;
 			}
 			
 			List promotedkey = getKey(s_half_b) ;
@@ -877,14 +878,13 @@ public class BPlusNode {
 		
 		if (isLeaf) {
 			System.out.println("Leaf ") ;
-			System.out.println("Keys : " + keys.size()) ;
+			System.out.println("data : " + keys.size()) ;
 			StringBuilder sb = new StringBuilder() ;
-			for (int i = 0 ; i < keys.size() ; i++) {
-				sb.append(keys.get(i) + ",") ;
+			for (int i = 0 ; i < data.size() ; i++) {
+				sb.append(data.get(i) + ",") ;
 			}
-			
 			System.out.println(sb.toString()) ;
-			
+
 			System.out.println("--- End Node ") ;
 			
 			return ;

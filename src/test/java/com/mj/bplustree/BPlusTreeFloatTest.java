@@ -1,53 +1,55 @@
 package com.mj.bplustree;
 
-import static org.junit.Assert.*;
+import com.mj.bplustree.fields.Field;
+import com.mj.bplustree.fields.FieldType;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import com.mj.bplustree.fields.Field;
-import com.mj.bplustree.fields.FieldType;
-import com.mj.bplustree.impl.BPlusNode;
-import org.junit.Test;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-public class BPlusTreeIntegerTest {
+public class BPlusTreeFloatTest {
 
 	@Test
 	public void testCreate() throws IOException {
 
 		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("id", FieldType.decimal));
 
 		try {
 
 
-			BPlusTree tree = BPlusTree.create(null, "intindex.db",
+			BPlusTree tree = BPlusTree.create(null, "floatindex.db",
 					Arrays.asList("id"), tableSpec);
 
-			tree.insert(Arrays.asList(4));
-			tree.insert(Arrays.asList(10));
-			tree.insert(Arrays.asList(20));
-			tree.insert(Arrays.asList(30));
-			tree.insert(Arrays.asList(15));
-			tree.insert(Arrays.asList(12));
-			tree.insert(Arrays.asList(17));
-			tree.insert(Arrays.asList(6));
-			tree.insert(Arrays.asList(25));
-			tree.insert(Arrays.asList(6));
+			tree.insert(Arrays.asList(4.1));
+			tree.insert(Arrays.asList(10.2));
+			tree.insert(Arrays.asList(20.3));
+			tree.insert(Arrays.asList(304));
+			tree.insert(Arrays.asList(15.5));
+			tree.insert(Arrays.asList(12.6));
+			tree.insert(Arrays.asList(17.7));
+			tree.insert(Arrays.asList(6.9));
+			tree.insert(Arrays.asList(25.11));
+			tree.insert(Arrays.asList(6.12));
 
 
 			tree.printTree();
 
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("intindex.db");
+			File f = new File("floatindex.db");
 			f.delete();
 		}
 	}
 
 	
-
+	/*
 	@Test
 	public void testInsert100() throws IOException {
 
@@ -158,7 +160,7 @@ public class BPlusTreeIntegerTest {
 			f.delete();
 		}
 	}
-
+	*/
 
 	// @Test
 	/*

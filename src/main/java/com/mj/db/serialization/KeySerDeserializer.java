@@ -36,12 +36,20 @@ public class KeySerDeserializer {
             if (type.equals(FieldType.integer)) {
                 int v = dis.readInt();
                 ret.add(v) ;
-            } else {
+            } else if (type.equals(FieldType.string)) {
                 // String
                 int len = dis.readInt();
                 byte[] sbytes = new byte[len];
                 dis.read(sbytes,0,len);
                 ret.add(new String(sbytes, StandardCharsets.UTF_8));
+            } else if (type.equals(FieldType.bool)) {
+                boolean v = dis.readBoolean();
+                ret.add(v);
+            } else if (type.equals(FieldType.decimal)) {
+                float v = dis.readFloat();
+                ret.add(v);
+            } else {
+                throw new RuntimeException("UnSupported field type "+ type);
             }
 
         }
@@ -58,7 +66,7 @@ public class KeySerDeserializer {
             if (type.equals(FieldType.integer)) {
                 dos.writeInt((int)values.get(index));
                 index++;
-            } else {
+            } else if (type.equals(FieldType.string)){
                 // String
                 int len = recordSpecMap.get(fieldname).getLength();
                 String val = (String)values.get(index);
@@ -66,10 +74,15 @@ public class KeySerDeserializer {
                 dos.writeInt(valBytes.length);
                 dos.write(valBytes);
                 index++ ;
+            } else if (type.equals(FieldType.bool)) {
+                dos.writeBoolean((boolean)values.get(index));
+                index++;
+            } else if (type.equals(FieldType.decimal)) {
+                dos.writeFloat((float)values.get(index));
+                index++;
+            } else {
+                throw new RuntimeException("UnSupported field type "+ type);
             }
-
-
         }
-
     }
 }
