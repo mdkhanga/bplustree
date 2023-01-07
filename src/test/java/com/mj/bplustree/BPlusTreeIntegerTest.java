@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 import com.mj.bplustree.fields.Field;
@@ -19,11 +21,10 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
+		BPlusTree tree = BPlusTree.create(null, "intindex.db",
+				Arrays.asList("id"), tableSpec);
+
 		try {
-
-
-			BPlusTree tree = BPlusTree.create(null, "intindex.db",
-					Arrays.asList("id"), tableSpec);
 
 			tree.insert(Arrays.asList(4));
 			tree.insert(Arrays.asList(10));
@@ -36,13 +37,12 @@ public class BPlusTreeIntegerTest {
 			tree.insert(Arrays.asList(25));
 			tree.insert(Arrays.asList(6));
 
-
 			tree.printTree();
 
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("intindex.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("intindex.db"));
 		}
 	}
 
@@ -54,21 +54,18 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
+		BPlusTree tree = BPlusTree.create(null, "intindex100.db",
+				Arrays.asList("id"), tableSpec);
 		try {
-
-			BPlusTree tree = BPlusTree.create(null, "intindex100.db",
-					Arrays.asList("id"), tableSpec);
-
 			for (int i = 1; i <= 100; i++) {
-
 				tree.insert(Arrays.asList(i));
 			}
 
 			tree.printTree();
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("intindex100.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("intindex100.db"));
 		}
 	}
 	
@@ -79,21 +76,19 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
+		BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
+				Arrays.asList("id"), tableSpec);
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
-					Arrays.asList("id"), tableSpec);
 
 			for (int i = 1; i <= 1000; i++) {
-
 				System.out.println(i);
-
 				tree.insert(Arrays.asList(i));
 			}
 
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("intindex1000.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("intindex1000.db"));
 		}
 	}
 
@@ -103,18 +98,22 @@ public class BPlusTreeIntegerTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
 
+		BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
+				Arrays.asList("id"), tableSpec);
+
+		BPlusTree tree2 = null;
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
-					Arrays.asList("id"), tableSpec);
+
 			for (int i = 1; i <= 1000; i++) {
 				tree.insert(Arrays.asList(i));
 			}
 
-			BPlusTree tree2 = BPlusTree.create(null, "intindex1000.db",
-					Arrays.asList("id"), tableSpec);
-
 			// int l = 613819 ;
 			int l = 153;
+
+			tree2 = BPlusTree.create(null, "intindex1000.db",
+					Arrays.asList("id"), tableSpec);
+
 
 			List ptr = tree2.find(Arrays.asList(l));
 
@@ -122,8 +121,9 @@ public class BPlusTreeIntegerTest {
 
 			assertTrue((int) ptr.get(0) == 153);
 		} finally {
-			File f = new File("intindex1000.db");
-			f.delete();
+			tree.close();
+			tree2.close();
+			Files.delete(Paths.get("intindex1000.db"));
 		}
 		
 	}
@@ -133,60 +133,33 @@ public class BPlusTreeIntegerTest {
 	public void testDelete() throws IOException {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.integer));
+
+		BPlusTree tree = BPlusTree.create(null, "intindex100.db",
+				Arrays.asList("id"), tableSpec);
+		BPlusTree tree2 = null ;
+
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex100.db",
-					Arrays.asList("id"), tableSpec);
 
 			for (int i = 1; i <= 100; i++) {
 				tree.insert(Arrays.asList(i));
 			}
 
-			BPlusTree tree2 = BPlusTree.create(null, "intindex100.db",
+			tree2 = BPlusTree.create(null, "intindex100.db",
 					Arrays.asList("id"), tableSpec);
-			assertTrue(tree2.isTreeValid());
 
+			assertTrue(tree2.isTreeValid());
 
 			tree2.printTree();
 
 			tree2.delete(Arrays.asList(73));
-
 			assertTrue(tree2.isTreeValid());
-
 			assertNull(tree2.find(Arrays.asList(73)));
 		} finally {
-			File f = new File("intindex100.db");
-			f.delete();
+			tree.close();
+			tree2.close();
+			Files.delete(Paths.get("intindex100.db"));
 		}
 	}
 
-
-	// @Test
-	/*
-	public void printBlocks() throws IOException {
-
-		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
-		BPlusTreeImpl tree = new BPlusTreeImpl(null,"intindex100.db",
-				Arrays.asList("id"), tableSpec) ;
-		BPlusNode node = tree.readFromDisk(0) ;
-		
-		node.printNode() ;
-
-
-		BPlusNode node1 = tree.readFromDisk(1) ;
-		node1.printNode() ;
-
-
-
-		BPlusNode node2 = tree.readFromDisk(2) ;
-		node2.printNode() ;
-
-
-
-			BPlusNode node3 = tree.readFromDisk(3) ;
-			node3.printNode() ;
-
-	
-	} */
 
 }

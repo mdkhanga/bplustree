@@ -6,6 +6,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,56 +23,55 @@ public class BPlusTreeFloatTest {
 		List<Field> tableSpec = new ArrayList<>();
 		tableSpec.add(new Field("id", FieldType.decimal));
 
+		BPlusTree tree = BPlusTree.create(null, "floatindex.db",
+				Arrays.asList("id"), tableSpec);
+
 		try {
 
-
-			BPlusTree tree = BPlusTree.create(null, "floatindex.db",
-					Arrays.asList("id"), tableSpec);
-
-			tree.insert(Arrays.asList(4.1));
-			tree.insert(Arrays.asList(10.2));
-			tree.insert(Arrays.asList(20.3));
-			tree.insert(Arrays.asList(304));
-			tree.insert(Arrays.asList(15.5));
-			tree.insert(Arrays.asList(12.6));
-			tree.insert(Arrays.asList(17.7));
-			tree.insert(Arrays.asList(6.9));
-			tree.insert(Arrays.asList(25.11));
-			tree.insert(Arrays.asList(6.12));
+			tree.insert(Arrays.asList(4.1f));
+			tree.insert(Arrays.asList(10.2f));
+			tree.insert(Arrays.asList(20.3f));
+			tree.insert(Arrays.asList(304f));
+			tree.insert(Arrays.asList(15.5f));
+			tree.insert(Arrays.asList(12.6f));
+			tree.insert(Arrays.asList(17.7f));
+			tree.insert(Arrays.asList(6.9f));
+			tree.insert(Arrays.asList(25.11f));
+			tree.insert(Arrays.asList(6.12f));
 
 
 			tree.printTree();
 
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("floatindex.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("floatindex.db"));
 		}
 	}
 
-	
-	/*
+
 	@Test
 	public void testInsert100() throws IOException {
 
 		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("id", FieldType.decimal));
+
+		BPlusTree tree = BPlusTree.create(null, "floatindex100.db",
+				Arrays.asList("id"), tableSpec);
 
 		try {
 
-			BPlusTree tree = BPlusTree.create(null, "intindex100.db",
-					Arrays.asList("id"), tableSpec);
-
 			for (int i = 1; i <= 100; i++) {
 
-				tree.insert(Arrays.asList(i));
+				float f = (float)(i*2.734);
+				tree.insert(Arrays.asList(f));
 			}
 
 			tree.printTree();
 			assertTrue(tree.isTreeValid());
 		} finally {
-			File f = new File("intindex100.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("floatindex100.db"));
 		}
 	}
 	
@@ -79,116 +80,97 @@ public class BPlusTreeFloatTest {
 	public void testwriteandvalidate1000() throws IOException {
 
 		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("id", FieldType.decimal));
+
+		BPlusTree tree = BPlusTree.create(null, "floatindex1000.db",
+				Arrays.asList("id"), tableSpec);
 
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
-					Arrays.asList("id"), tableSpec);
 
 			for (int i = 1; i <= 1000; i++) {
-
-				System.out.println(i);
-
-				tree.insert(Arrays.asList(i));
+				float f = (float)(i*3.317);
+				tree.insert(Arrays.asList(f));
 			}
 
 			assertTrue(tree.isTreeValid());
+			tree.printTree();
 		} finally {
-			File f = new File("intindex1000.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("floatindex1000.db"));
 		}
 	}
+
 
 	@Test
 	public void testFind() throws IOException {
 
 		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("id", FieldType.decimal));
+
+		BPlusTree tree = BPlusTree.create(null, "floatindex1000.db",
+				Arrays.asList("id"), tableSpec);
+		BPlusTree tree2 = null ;
 
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex1000.db",
-					Arrays.asList("id"), tableSpec);
 			for (int i = 1; i <= 1000; i++) {
-				tree.insert(Arrays.asList(i));
+				float f = (float)(i*3.317);
+				tree.insert(Arrays.asList(f));
 			}
 
-			BPlusTree tree2 = BPlusTree.create(null, "intindex1000.db",
+			tree2 = BPlusTree.create(null, "floatindex1000.db",
 					Arrays.asList("id"), tableSpec);
 
-			// int l = 613819 ;
-			int l = 153;
+			float l = 872.371f;
 
 			List ptr = tree2.find(Arrays.asList(l));
 
 			System.out.println(ptr.get(0));
 
-			assertTrue((int) ptr.get(0) == 153);
+			assertTrue((float) ptr.get(0) == 872.371f);
 		} finally {
-			File f = new File("intindex1000.db");
+			tree.close();
+			tree2.close();
+			File f = new File("floatindex1000.db");
 			f.delete();
 		}
 		
 	}
-	
 
 	@Test
 	public void testDelete() throws IOException {
 		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("id", FieldType.decimal));
+
+		BPlusTree tree = BPlusTree.create(null, "floatindex100.db",
+				Arrays.asList("id"), tableSpec);
+		BPlusTree tree2 = null;
 		try {
-			BPlusTree tree = BPlusTree.create(null, "intindex100.db",
-					Arrays.asList("id"), tableSpec);
 
 			for (int i = 1; i <= 100; i++) {
-				tree.insert(Arrays.asList(i));
+				float f = (float)(i*2.734);
+				tree.insert(Arrays.asList(f));
 			}
 
-			BPlusTree tree2 = BPlusTree.create(null, "intindex100.db",
+			tree2 = BPlusTree.create(null, "floatindex100.db",
 					Arrays.asList("id"), tableSpec);
+
 			assertTrue(tree2.isTreeValid());
 
+			List ptr = tree2.find(Arrays.asList(65.616f));
+			assertTrue((float) ptr.get(0) == 65.616f);
 
 			tree2.printTree();
-
-			tree2.delete(Arrays.asList(73));
+			tree2.delete(Arrays.asList(65.616f));
 
 			assertTrue(tree2.isTreeValid());
 
-			assertNull(tree2.find(Arrays.asList(73)));
+			assertNull(tree2.find(Arrays.asList(65.616f)));
 		} finally {
-			File f = new File("intindex100.db");
-			f.delete();
+			tree.close();
+			tree2.close();
+			Files.delete(Paths.get("floatindex100.db"));
 		}
 	}
-	*/
 
-	// @Test
-	/*
-	public void printBlocks() throws IOException {
-
-		List<Field> tableSpec = new ArrayList<>();
-		tableSpec.add(new Field("id", FieldType.integer));
-		BPlusTreeImpl tree = new BPlusTreeImpl(null,"intindex100.db",
-				Arrays.asList("id"), tableSpec) ;
-		BPlusNode node = tree.readFromDisk(0) ;
-		
-		node.printNode() ;
-
-
-		BPlusNode node1 = tree.readFromDisk(1) ;
-		node1.printNode() ;
-
-
-
-		BPlusNode node2 = tree.readFromDisk(2) ;
-		node2.printNode() ;
-
-
-
-			BPlusNode node3 = tree.readFromDisk(3) ;
-			node3.printNode() ;
-
-	
-	} */
 
 }

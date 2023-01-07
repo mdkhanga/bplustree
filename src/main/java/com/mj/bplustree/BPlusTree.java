@@ -22,4 +22,6 @@ public interface BPlusTree {
         return new BPlusTreeImpl(storeDir, filename, keySpec, tableSpec);
     }
 
+    void close() throws IOException;
+
 }

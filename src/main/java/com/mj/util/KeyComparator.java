@@ -15,6 +15,8 @@ public class KeyComparator implements Comparator<List> {
     private IntegerComparator integerComparator = new IntegerComparator();
     private StringComparator stringComparator = new StringComparator();
 
+    private FloatComparator floatComparator = new FloatComparator();
+
     public KeyComparator(List<String> kSpec, Map<String, Field> spec) {
         keySpec = kSpec;
         tableSpec = spec;
@@ -42,6 +44,8 @@ public class KeyComparator implements Comparator<List> {
                res = integerComparator.compare((Integer)o1.get(i),(Integer)o2.get(i));
            } else if (type.equals(FieldType.string)) {
                res = stringComparator.compare((String)o1.get(i),(String)o2.get(i));
+           } else if (type.equals(FieldType.decimal)) {
+               res = floatComparator.compare((float)o1.get(i), (float)o2.get(i));
            }
 
            if (res != 0) {
@@ -51,6 +55,5 @@ public class KeyComparator implements Comparator<List> {
 
         return 0;
     }
-
 
 }

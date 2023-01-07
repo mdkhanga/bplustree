@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,9 +33,10 @@ public class CompositeKeyEmployeeTest {
 		tableSpec.add(new Field("lastname", FieldType.string, 10));
 		tableSpec.add(new Field("salary", FieldType.integer));
 
+		BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex.db",
+				Arrays.asList("lastname", "firstname"), tableSpec);
+
 		try {
-			BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex.db",
-					Arrays.asList("lastname", "firstname"), tableSpec);
 
 			tree.insert(Arrays.asList(1, "Nori", "Aoki", 5000));
 			tree.insert(Arrays.asList(2, "Joe", "Panik", 5200));
@@ -47,13 +50,12 @@ public class CompositeKeyEmployeeTest {
 			tree.insert(Arrays.asList(10, "Tim", "Lincicum", 6493));
 			tree.insert(Arrays.asList(11, "Santiago", "Casilla", 6777));
 
-
 			assertTrue(tree.isTreeValid());
 
 			tree.printTree();
 		} finally {
-			File f = new File("empindex.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("empindex.db"));
 		}
 	}
 	
@@ -61,16 +63,17 @@ public class CompositeKeyEmployeeTest {
 	@Test
 	public void testCreate100() throws IOException {
 
+		List<Field> tableSpec = new ArrayList<>();
+
+		tableSpec.add(new Field("id", FieldType.integer));
+		tableSpec.add(new Field("firstname", FieldType.string, 10));
+		tableSpec.add(new Field("lastname", FieldType.string, 10));
+		tableSpec.add(new Field("salary", FieldType.integer));
+
+		BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex100.db",
+				Arrays.asList("lastname", "firstname"), tableSpec);
+
 		try {
-			List<Field> tableSpec = new ArrayList<>();
-
-			tableSpec.add(new Field("id", FieldType.integer));
-			tableSpec.add(new Field("firstname", FieldType.string, 10));
-			tableSpec.add(new Field("lastname", FieldType.string, 10));
-			tableSpec.add(new Field("salary", FieldType.integer));
-
-			BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex100.db",
-					Arrays.asList("lastname", "firstname"), tableSpec);
 
 			for (int i = 1; i <= 1000; i++) {
 
@@ -80,12 +83,11 @@ public class CompositeKeyEmployeeTest {
 				tree.insert(Arrays.asList(i, firstname, lastname, 21 * i));
 			}
 
-
 			assertTrue(tree.isTreeValid());
 			tree.printTree();
 		} finally {
-			File f = new File("empindex100.db");
-			f.delete();
+			tree.close();
+			Files.delete(Paths.get("empindex100.db"));
 		}
 	}
 
@@ -110,7 +112,5 @@ public class CompositeKeyEmployeeTest {
 		// System.out.println(b) ;
 		return b.toString() ;
 	}
-	
 
-	
 }

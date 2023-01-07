@@ -201,7 +201,6 @@ public class BPlusTreeImpl implements BPlusTree {
 				
 		treeStore.seek(blockpointer*BLOCK_SIZE) ;
 		
-		
 		int freeornot = treeStore.readByte() ;
 		
 		if (freeornot == 1) { // valid block
@@ -347,6 +346,10 @@ public class BPlusTreeImpl implements BPlusTree {
 	
 	public void printBlock(int i) {
 
+	}
+
+	public void close() throws IOException {
+		treeStore.close();
 	}
 	
 }
