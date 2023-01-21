@@ -33,7 +33,7 @@ public class CompositeKeyEmployeeTest {
 		tableSpec.add(new Field("lastname", FieldType.string, 10));
 		tableSpec.add(new Field("salary", FieldType.integer));
 
-		BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex.db",
+		BPlusTree tree = BPlusTree.create(null, "empindex.db",
 				Arrays.asList("lastname", "firstname"), tableSpec);
 
 		try {
@@ -59,7 +59,6 @@ public class CompositeKeyEmployeeTest {
 		}
 	}
 	
-
 	@Test
 	public void testCreate100() throws IOException {
 
@@ -70,7 +69,7 @@ public class CompositeKeyEmployeeTest {
 		tableSpec.add(new Field("lastname", FieldType.string, 10));
 		tableSpec.add(new Field("salary", FieldType.integer));
 
-		BPlusTreeImpl tree = new BPlusTreeImpl(null, "empindex100.db",
+		BPlusTree tree = BPlusTree.create(null, "empindex100.db",
 				Arrays.asList("lastname", "firstname"), tableSpec);
 
 		try {
